@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, EmailStr, validator
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
@@ -11,16 +11,16 @@ app = FastAPI()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Configure CORS: Add your deployed frontend URL here
+# Configure CORS - add your frontend deployed URL here
 origins = [
+    "https://leadsystem-7vhpe4yx7-baratam-snehiths-projects.vercel.app",
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://leadsystem-vert.vercel.app",  # Your frontend deployed URL
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=origins,  # Allow your frontend URL(s)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -66,6 +66,7 @@ async def submit_lead(lead: Lead):
                 json=payload,
                 headers=headers
             )
+            
             response.raise_for_status()
             
             return JSONResponse(

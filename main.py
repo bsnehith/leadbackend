@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, EmailStr, validator
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
@@ -11,10 +11,11 @@ app = FastAPI()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Configure CORS
+# Configure CORS - add your frontend URL here
 origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
+    "https://leadsystem-vert.vercel.app",  # <-- Add your frontend URL here
 ]
 
 app.add_middleware(
@@ -36,6 +37,10 @@ class Lead(BaseModel):
         if not v.strip():
             raise ValueError('Name cannot be empty')
         return v.title()
+
+@app.get("/")
+async def root():
+    return {"message": "Welcome to the Lead Submission API"}
 
 @app.post("/submit")
 async def submit_lead(lead: Lead):

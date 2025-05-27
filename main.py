@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel, EmailStr, validator
 from fastapi.middleware.cors import CORSMiddleware
 import httpx
@@ -11,11 +11,11 @@ app = FastAPI()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Configure CORS - add your frontend URL here
+# Configure CORS: Add your deployed frontend URL here
 origins = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
-    "https://leadsystem-vert.vercel.app",  # <-- Add your frontend URL here
+    "https://leadsystem-vert.vercel.app",  # Your frontend deployed URL
 ]
 
 app.add_middleware(
@@ -38,10 +38,6 @@ class Lead(BaseModel):
             raise ValueError('Name cannot be empty')
         return v.title()
 
-@app.get("/")
-async def root():
-    return {"message": "Welcome to the Lead Submission API"}
-
 @app.post("/submit")
 async def submit_lead(lead: Lead):
     webhook_url = "https://bsnehith19.app.n8n.cloud/webhook/lead-submit"
@@ -54,7 +50,6 @@ async def submit_lead(lead: Lead):
     try:
         logger.info(f"Processing lead: {lead.json()}")
         
-        # Validate data before sending
         if not lead.name or not lead.email:
             raise HTTPException(status_code=422, detail="Name and email are required")
         
@@ -71,7 +66,6 @@ async def submit_lead(lead: Lead):
                 json=payload,
                 headers=headers
             )
-            
             response.raise_for_status()
             
             return JSONResponse(
